@@ -1,0 +1,9 @@
+flask
+pillow
+pytesseract
+opencv-python
+tensorflow
+numpy
+requests
+scikit-learn
+pyautogui
