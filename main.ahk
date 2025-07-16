@@ -5,20 +5,23 @@ SetWorkingDir, %A_ScriptDir%
 #Include JSON.ahk
 #Include gdip.ahk
 
+If !FileExist("config.ini")
+{
+    MsgBox, config.ini not found.
+    ExitApp
+}
+
 If !IsFunc("Gdip_Startup")
 {
     MsgBox, Gdip.ahk is not included or is corrupted.
     ExitApp
 }
 
-; Install Python Dependencies
 RunWait, pip install -r requirements.txt, , Hide
 
-; Start Python Server
 Run, python main.py
 Sleep, 5000
 
-; Wait for server to start
 Loop
 {
     try
@@ -35,14 +38,12 @@ Loop
     Sleep, 1000
 }
 
-; GUI
 Gui, Font, s12, Segoe UI
 Gui, Add, Button, x12 y10 w120 h50 gStart, Start
 Gui, Add, Button, x142 y10 w120 h50 gStop, Stop
 Gui, Add, Button, x272 y10 w50 h50 gSettings, ⚙️
 Gui, Show, h70 w335, Auto Clicker
 
-; Settings GUI
 Gui, Settings:Font, s10, Segoe UI
 Gui, Settings:Add, Tab2, x10 y10 w480 h380, General|Coordinates|Scrolls|Webhook
 Gui, Settings:Tab, General
@@ -74,7 +75,6 @@ Gui, Settings:Add, Button, x260 y200 w100 h20 gPickOption1BottomRight, Choose Lo
 Gui, Settings:Add, Text, x20 y230, Option 1 Click:
 Gui, Settings:Add, Edit, x150 y230 w100 vOption1Click
 Gui, Settings:Add, Button, x260 y230 w100 h20 gPickOption1Click, Choose Location
-; ... (add more option settings here)
 Gui, Settings:Tab, Scrolls
 Gui, Settings:Add, CheckBox, x20 y50 vScrollHoppa, Hoppa
 Gui, Settings:Add, CheckBox, x120 y50 vScrollSnarvindur, Snarvindur
@@ -92,8 +92,6 @@ return
 Start:
     Log("Script started.")
     SetTimer, MainLoop, 1000
-
-    ; Click Play Button
     IniRead, play_button, config.ini, Coordinates, play_button
     Click, %play_button%
     SendWebhookWithScreenshot("Clicked play button.", "play")
@@ -107,22 +105,16 @@ Stop:
     return
 
 Settings:
-    ; Load current settings
     IniRead, current_start_key, config.ini, Settings, start_key, F1
     IniRead, current_stop_key, config.ini, Settings, stop_key, F2
     IniRead, current_webhook_url, config.ini, Settings, webhook_url,
     IniRead, current_enabled_scrolls, config.ini, Settings, enabled_scrolls,
-
-    ; Set the GUI controls with current values
     GuiControl, Settings:, StartKey, %current_start_key%
     GuiControl, Settings:, StopKey, %current_stop_key%
     GuiControl, Settings:, WebhookURL, %current_webhook_url%
-
-    ; Set checkboxes based on enabled scrolls
     GuiControl, Settings:, ScrollHoppa, % InStr(current_enabled_scrolls, "hoppa") ? 1 : 0
     GuiControl, Settings:, ScrollSnarvindur, % InStr(current_enabled_scrolls, "snarvindur") ? 1 : 0
     GuiControl, Settings:, ScrollPercutiens, % InStr(current_enabled_scrolls, "percutiens") ? 1 : 0
-
     Gui, Settings:Show, h300 w400, Settings
     return
 
@@ -136,13 +128,10 @@ SaveSettings:
         enabled_scrolls .= "snarvindur,"
     if (ScrollPercutiens)
         enabled_scrolls .= "percutiens,"
-
-    ; Save all settings to config.ini
     IniWrite, %StartKey%, config.ini, Settings, start_key
     IniWrite, %StopKey%, config.ini, Settings, stop_key
     IniWrite, %WebhookURL%, config.ini, Settings, webhook_url
     IniWrite, %enabled_scrolls%, config.ini, Settings, enabled_scrolls
-
     webhook_settings := ""
     if (WebhookOnStart)
         webhook_settings .= "start,"
@@ -157,15 +146,10 @@ SaveSettings:
     if (WebhookOnSilver)
         webhook_settings .= "silver,"
     IniWrite, %webhook_settings%, config.ini, Settings, webhook_settings
-
-    ; Update hotkeys
     Hotkey, %StartKey%, Start
     Hotkey, %StopKey%, Stop
-
-    ; Send test webhook
     if (WebhookURL)
         SendWebhookWithScreenshot("Webhook test successful!", "start")
-
     MsgBox, 0, Settings, Settings saved successfully!
     return
 
@@ -235,65 +219,55 @@ MainLoop:
     try
     {
         FocusRoblox()
-        ; Every 1 minute and 30 seconds
         if (A_TickCount - last_menu_click > 90000)
+        {
+            in_menu_transition := true
+            IniRead, menu_button, config.ini, Coordinates, menu_button
+            Click, %menu_button%
+            SendWebhookWithScreenshot("Clicked menu button.", "menu")
+            last_menu_click := A_TickCount
+            Sleep, 10000
+            IniRead, play_button, config.ini, Coordinates, play_button
+            Click, %play_button%
+            SendWebhookWithScreenshot("Clicked play button.", "play")
+            in_menu_transition := false
+        }
+
+        if (in_menu_transition)
+            return
+
+        current_day := GetDay()
+        if (current_day != last_day)
+        {
+            if (last_day != "")
+            {
+                PerformGachaAction()
+                SendWebhookWithScreenshot("Day changed to " . current_day . ". Performing gacha action.", "captcha")
+            }
+            last_day := current_day
+        }
+
+        current_lives := GetLives()
+        if (current_lives != last_lives)
+        {
+            if (last_lives != "" and current_lives < last_lives)
+            {
+                SendWebhookWithScreenshot("Lives changed to " . current_lives . ". Stopping script.", "stop")
+                ExitApp
+            }
+            last_lives := current_lives
+        }
+
+        current_silver := GetSilver()
+        if (current_silver < 250)
+        {
+            SendWebhookWithScreenshot("Silver is less than 250. Stopping script.", "silver")
+            ExitApp
+        }
     }
     catch e
     {
         Log("Error in MainLoop: " . e.Message)
-    }
-    {
-        in_menu_transition := true
-        ; Click Menu Button
-        IniRead, menu_button, config.ini, Coordinates, menu_button
-        Click, %menu_button%
-        SendWebhookWithScreenshot("Clicked menu button.", "menu")
-        last_menu_click := A_TickCount
-
-        ; Wait 10 seconds
-        Sleep, 10000
-
-        ; Click Play Button
-        IniRead, play_button, config.ini, Coordinates, play_button
-        Click, %play_button%
-        SendWebhookWithScreenshot("Clicked play button.", "play")
-        in_menu_transition := false
-    }
-
-    if (in_menu_transition)
-        return
-
-    ; Check day
-    current_day := GetDay()
-    if (current_day != last_day)
-    {
-        if (last_day != "")
-        {
-            ; Perform gacha action
-            PerformGachaAction()
-            SendWebhookWithScreenshot("Day changed to " . current_day . ". Performing gacha action.", "captcha")
-        }
-        last_day := current_day
-    }
-
-    ; Check lives
-    current_lives := GetLives()
-    if (current_lives != last_lives)
-    {
-        if (last_lives != "" and current_lives < last_lives)
-        {
-            SendWebhookWithScreenshot("Lives changed to " . current_lives . ". Stopping script.", "stop")
-            ExitApp
-        }
-        last_lives := current_lives
-    }
-
-    ; Check silver
-    current_silver := GetSilver()
-    if (current_silver < 250)
-    {
-        SendWebhookWithScreenshot("Silver is less than 250. Stopping script.", "silver")
-        ExitApp
     }
     return
 
@@ -347,21 +321,16 @@ SendWebhookWithScreenshot(message, event_type)
     IniRead, webhook_url, config.ini, Settings, webhook_url
     if (webhook_url)
     {
-        ; Take screenshot
-        DllCall("gdi32\CreateDC", "Str", "DISPLAY", "Ptr", 0, "Ptr", 0, "Ptr", 0)
+        pToken := Gdip_Startup()
+        hBM := DllCall("gdi32\CreateCompatibleBitmap", "Ptr", DllCall("gdi32\CreateDC", "Str", "DISPLAY", "Ptr", 0, "Ptr", 0, "Ptr", 0), "Int", A_ScreenWidth, "Int", A_ScreenHeight)
         hDC := DllCall("gdi32\CreateCompatibleDC", "Ptr", 0)
-        hBM := DllCall("gdi32\CreateCompatibleBitmap", "Ptr", hDC, "Int", A_ScreenWidth, "Int", A_ScreenHeight)
         DllCall("gdi32\SelectObject", "Ptr", hDC, "Ptr", hBM)
         DllCall("gdi32\BitBlt", "Ptr", hDC, "Int", 0, "Int", 0, "Int", A_ScreenWidth, "Int", A_ScreenHeight, "Ptr", DllCall("gdi32\CreateDC", "Str", "DISPLAY", "Ptr", 0, "Ptr", 0, "Ptr", 0), "Int", 0, "Int", 0, "UInt", 0xCC0020)
-
-        ; Save screenshot to file
-        pToken := Gdip_Startup()
         pBitmap := Gdip_CreateBitmapFromHBITMAP(hBM)
         Gdip_SaveBitmapToFile(pBitmap, "screenshot.png", "image/png")
         Gdip_DisposeImage(pBitmap)
         Gdip_Shutdown(pToken)
 
-        ; Send webhook
         whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
         whr.Open("POST", webhook_url, true)
 
@@ -377,7 +346,6 @@ SendWebhookWithScreenshot(message, event_type)
 
         FileRead, file_content, *c screenshot.png
 
-        ; Combine payload and file content
         len1 := StrLen(payload)
         len2 := VarSetCapacity(file_content)
         VarSetCapacity(requestBody, len1 + len2)

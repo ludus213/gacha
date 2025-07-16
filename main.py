@@ -21,11 +21,13 @@ def log_response(func):
         return response
     return wrapper
 
-# Load config
 config = configparser.ConfigParser()
-config.read('config.ini')
+try:
+    config.read('config.ini')
+except Exception as e:
+    print(f"Error reading config file: {e}")
+    exit()
 
-# Load the trained model
 model = tf.keras.models.load_model('captcha_model.h5')
 
 def get_config_coords(key):
@@ -72,14 +74,12 @@ def get_lives():
 @app.route('/gacha_action', methods=['POST'])
 def gacha_action():
     try:
-        # Click on the specified color
-        pixel = pyautogui.locateCenterOnScreen('pixel.png', confidence=0.8) # replace with a screenshot of the pixel
+        pixel = pyautogui.locateCenterOnScreen('pixel.png', confidence=0.8)
         if pixel:
             pyautogui.click(pixel)
         else:
             return jsonify({'error': 'Pixel not found'})
 
-        # Wait for option text to appear
         start_time = time.time()
         while time.time() - start_time < 45:
             for i in range(1, 6):
@@ -88,12 +88,10 @@ def gacha_action():
                 option_img = ImageGrab.grab(bbox=(*option_tl, *option_br))
                 text = pytesseract.image_to_string(option_img, config='--psm 6').strip()
                 if text:
-                    # Call solve_captcha
                     response = requests.post('http://127.0.0.1:5000/solve_captcha')
                     return response.json()
             time.sleep(1)
 
-        # If timeout is reached, proceed with the clicks
         pyautogui.click(1156, 856)
         time.sleep(1)
         pyautogui.click(1156, 856)
@@ -108,21 +106,17 @@ def solve_captcha():
         captcha_tl = get_config_coords('captcha_entity_top_left')
         captcha_br = get_config_coords('captcha_entity_bottom_right')
 
-        # Grab captcha image
         img = ImageGrab.grab(bbox=(*captcha_tl, *captcha_br))
         img = img.resize((150, 150))
         img_array = np.array(img) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
 
-        # Predict
         prediction = model.predict(img_array)
         class_index = np.argmax(prediction)
 
-        # Get class names from folder structure
         class_names = sorted(os.listdir('images/captcha'))
         captcha_name = class_names[class_index]
 
-        # Get option text and click location
         options = []
         for i in range(1, 6):
             option_tl = get_config_coords(f'option{i}_top_left')
@@ -131,7 +125,6 @@ def solve_captcha():
             text = pytesseract.image_to_string(option_img, config='--psm 6').strip()
             options.append(text)
 
-        # Match and click
         for i, option_text in enumerate(options):
             if captcha_name.lower() in option_text.lower():
                 click_coords = get_config_coords(f'option{i+1}_click')
@@ -141,7 +134,6 @@ def solve_captcha():
                 time.sleep(1)
                 pyautogui.click(1156, 856)
 
-                # Scan hotbar
                 hotbar_tl = (841, 950)
                 hotbar_br = (1714, 1028)
                 hotbar_img = ImageGrab.grab(bbox=(*hotbar_tl, *hotbar_br))
@@ -155,11 +147,9 @@ def solve_captcha():
 
                 for scroll_name, scroll_key in scrolls.items():
                     if scroll_key in hotbar_text:
-                        # Check if scroll is enabled in config
                         enabled_scrolls = get_config_setting('enabled_scrolls').split(',')
                         if scroll_key in enabled_scrolls:
                             send_webhook(f"@everyone Found {scroll_name}!", "hotbar.png")
-                            # os.system("taskkill /im RobloxPlayerBeta.exe /f")
                             return jsonify({'status': 'success', 'found_scroll': scroll_name})
 
                 return jsonify({'status': 'success', 'clicked': option_text})
@@ -175,7 +165,6 @@ def get_silver():
         silver_tl = get_config_coords('silver_top_left')
         silver_br = get_config_coords('silver_bottom_right')
 
-        # Check if coordinates are valid
         if silver_tl[0] < 0 or silver_tl[1] < 0 or silver_br[0] > pyautogui.size()[0] or silver_br[1] > pyautogui.size()[1]:
             return jsonify({'error': 'Invalid coordinates for silver detection.'})
 
@@ -190,7 +179,6 @@ def index():
     return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
-    # Set Tesseract path
     tesseract_path = get_config_setting('tesseract_path')
     if tesseract_path:
         pytesseract.pytesseract.tesseract_cmd = tesseract_path
