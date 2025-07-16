@@ -42,7 +42,7 @@ Gui, Show, h70 w335, Auto Clicker
 
 ; Settings GUI
 Gui, Settings:Font, s10, Segoe UI
-Gui, Settings:Add, Tab4, x10 y10 w480 h380, General|Coordinates|Scrolls|Webhook
+Gui, Settings:Add, Tab2, x10 y10 w480 h380, General|Coordinates|Scrolls|Webhook
 Gui, Settings:Tab, General
 Gui, Settings:Add, Text, x20 y50, Start Key:
 Gui, Settings:Add, Hotkey, x120 y50 vStartKey, F1
@@ -211,21 +211,21 @@ FocusRoblox()
 
 in_menu_transition := false
 
+OnExit("ExitFunc")
+
+ExitFunc(ExitReason, ExitCode)
+{
+    Log("Script exited. Reason: " . ExitReason . " Code: " . ExitCode)
+}
+
 Log(message)
 {
     FileAppend, %A_Now% - %message%`n, log.txt
 }
 
 MainLoop:
-    try
-    {
-        FocusRoblox()
-        ; Every 1 minute and 30 seconds
-    }
-    catch e
-    {
-        Log("Error in MainLoop: " . e.Message)
-    }
+    FocusRoblox()
+    ; Every 1 minute and 30 seconds
     if (A_TickCount - last_menu_click > 90000)
     {
         in_menu_transition := true
