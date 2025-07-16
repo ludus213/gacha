@@ -91,8 +91,13 @@ return
 
 Start:
     Log("Script started.")
-    SendWebhookWithScreenshot("Script started.", "start")
     SetTimer, MainLoop, 1000
+    SendWebhookWithScreenshot("Script started.", "start")
+
+    ; Click Play Button
+    IniRead, play_button, config.ini, Coordinates, play_button
+    Click, %play_button%
+    SendWebhookWithScreenshot("Clicked play button.", "play")
     return
 
 Stop:
@@ -158,7 +163,8 @@ SaveSettings:
     Hotkey, %StopKey%, Stop
 
     ; Send test webhook
-    SendWebhookWithScreenshot("Webhook test successful!", "start")
+    if (WebhookURL)
+        SendWebhookWithScreenshot("Webhook test successful!", "start")
 
     MsgBox, 0, Settings, Settings saved successfully!
     return
