@@ -92,12 +92,12 @@ return
 Start:
     Log("Script started.")
     SetTimer, MainLoop, 1000
-    SendWebhookWithScreenshot("Script started.", "start")
 
     ; Click Play Button
     IniRead, play_button, config.ini, Coordinates, play_button
     Click, %play_button%
     SendWebhookWithScreenshot("Clicked play button.", "play")
+    SendWebhookWithScreenshot("Script started.", "start")
     return
 
 Stop:
@@ -232,9 +232,16 @@ Log(message)
 }
 
 MainLoop:
-    FocusRoblox()
-    ; Every 1 minute and 30 seconds
-    if (A_TickCount - last_menu_click > 90000)
+    try
+    {
+        FocusRoblox()
+        ; Every 1 minute and 30 seconds
+        if (A_TickCount - last_menu_click > 90000)
+    }
+    catch e
+    {
+        Log("Error in MainLoop: " . e.Message)
+    }
     {
         in_menu_transition := true
         ; Click Menu Button
