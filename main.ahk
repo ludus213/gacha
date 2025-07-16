@@ -4,6 +4,12 @@ SetWorkingDir, %A_ScriptDir%
 #Include JSON.ahk
 #Include gdip.ahk
 
+If !IsFunc("Gdip_Startup")
+{
+    MsgBox, Gdip.ahk is not included or is corrupted.
+    ExitApp
+}
+
 ; Install Python Dependencies
 RunWait, pip install -r requirements.txt, , Hide
 
@@ -82,11 +88,13 @@ Gui, Settings:Add, Button, x20 y250 w100 h30 gSaveSettings, Save
 return
 
 Start:
+    Log("Script started.")
     SendWebhookWithScreenshot("Script started.", "start")
     SetTimer, MainLoop, 1000
     return
 
 Stop:
+    Log("Script stopped.")
     SendWebhookWithScreenshot("Script stopped.", "stop")
     SetTimer, MainLoop, Off
     return
@@ -112,6 +120,7 @@ Settings:
     return
 
 SaveSettings:
+    Log("Saving settings.")
     Gui, Settings:Submit, NoHide
     enabled_scrolls := ""
     if (ScrollHoppa)
@@ -202,9 +211,21 @@ FocusRoblox()
 
 in_menu_transition := false
 
+Log(message)
+{
+    FileAppend, %A_Now% - %message%`n, log.txt
+}
+
 MainLoop:
-    FocusRoblox()
-    ; Every 1 minute and 30 seconds
+    try
+    {
+        FocusRoblox()
+        ; Every 1 minute and 30 seconds
+    }
+    catch e
+    {
+        Log("Error in MainLoop: " . e.Message)
+    }
     if (A_TickCount - last_menu_click > 90000)
     {
         in_menu_transition := true
