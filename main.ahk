@@ -49,6 +49,7 @@ CreateGUI()
 
 CreateSettingsGUI()
 {
+    global vStartKey, vStopKey, vWebhookURL, vDayTopLeft, vDayBottomRight, vLivesTopLeft, vLivesBottomRight, vOption1TopLeft, vOption1BottomRight, vOption1Click, vScrollHoppa, vScrollSnarvindur, vScrollPercutiens, vWebhookOnStart, vWebhookOnStop, vWebhookOnCaptcha, vWebhookOnMenu, vWebhookOnPlay, vWebhookOnSilver
     Gui, Settings:Font, s10, Segoe UI
     Gui, Settings:Add, Tab2, x10 y10 w480 h380, General|Coordinates|Scrolls|Webhook
     Gui, Settings:Tab, General
@@ -92,6 +93,10 @@ CreateSettingsGUI()
     Gui, Settings:Add, CheckBox, x120 y80 vWebhookOnPlay, On Play
     Gui, Settings:Add, CheckBox, x220 y80 vWebhookOnSilver, On Silver
     Gui, Settings:Add, Button, x20 y250 w100 h30 gSaveSettings, Save
+    return
+
+gSaveSettings:
+    SaveSettings()
     return
 }
 
@@ -181,32 +186,32 @@ PickLocation(control)
     return
 }
 
-PickDayTopLeft:
-    PickLocation("DayTopLeft")
+gPickDayTopLeft:
+    PickLocation("vDayTopLeft")
     return
 
-PickDayBottomRight:
-    PickLocation("DayBottomRight")
+gPickDayBottomRight:
+    PickLocation("vDayBottomRight")
     return
 
-PickLivesTopLeft:
-    PickLocation("LivesTopLeft")
+gPickLivesTopLeft:
+    PickLocation("vLivesTopLeft")
     return
 
-PickLivesBottomRight:
-    PickLocation("LivesBottomRight")
+gPickLivesBottomRight:
+    PickLocation("vLivesBottomRight")
     return
 
-PickOption1TopLeft:
-    PickLocation("Option1TopLeft")
+gPickOption1TopLeft:
+    PickLocation("vOption1TopLeft")
     return
 
-PickOption1BottomRight:
-    PickLocation("Option1BottomRight")
+gPickOption1BottomRight:
+    PickLocation("vOption1BottomRight")
     return
 
-PickOption1Click:
-    PickLocation("Option1Click")
+gPickOption1Click:
+    PickLocation("vOption1Click")
     return
 
 FocusRoblox()
@@ -217,7 +222,9 @@ FocusRoblox()
     }
 }
 
-in_menu_transition := false
+global in_menu_transition := false
+global last_day := ""
+global last_lives := ""
 
 OnExit("ExitFunc")
 
