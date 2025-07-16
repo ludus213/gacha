@@ -38,73 +38,65 @@ Loop
     Sleep, 1000
 }
 
-Gui, Font, s12, Segoe UI
-Gui, Add, Button, x12 y10 w120 h50 gStart, Start
-Gui, Add, Button, x142 y10 w120 h50 gStop, Stop
-Gui, Add, Button, x272 y10 w50 h50 gSettings, ⚙️
-Gui, Show, h70 w335, Auto Clicker
+CreateGUI()
+{
+    Gui, Font, s12, Segoe UI
+    Gui, Add, Button, x12 y10 w120 h50 gStart, Start
+    Gui, Add, Button, x142 y10 w120 h50 gStop, Stop
+    Gui, Add, Button, x272 y10 w50 h50 gSettings, ⚙️
+    Gui, Show, h70 w335, Auto Clicker
+}
 
-Gui, Settings:Font, s10, Segoe UI
-Gui, Settings:Add, Tab2, x10 y10 w480 h380, General|Coordinates|Scrolls|Webhook
-Gui, Settings:Tab, General
-Gui, Settings:Add, Text, x20 y50, Start Key:
-Gui, Settings:Add, Hotkey, x120 y50 vStartKey, F1
-Gui, Settings:Add, Text, x20 y90, Stop Key:
-Gui, Settings:Add, Hotkey, x120 y90 vStopKey, F2
-Gui, Settings:Add, Text, x20 y130, Webhook URL:
-Gui, Settings:Add, Edit, x120 y130 w250 vWebhookURL
-Gui, Settings:Tab, Coordinates
-Gui, Settings:Add, Text, x20 y50, Day Top Left:
-Gui, Settings:Add, Edit, x150 y50 w100 vDayTopLeft
-Gui, Settings:Add, Button, x260 y50 w100 h20 gPickDayTopLeft, Choose Location
-Gui, Settings:Add, Text, x20 y80, Day Bottom Right:
-Gui, Settings:Add, Edit, x150 y80 w100 vDayBottomRight
-Gui, Settings:Add, Button, x260 y80 w100 h20 gPickDayBottomRight, Choose Location
-Gui, Settings:Add, Text, x20 y110, Lives Top Left:
-Gui, Settings:Add, Edit, x150 y110 w100 vLivesTopLeft
-Gui, Settings:Add, Button, x260 y110 w100 h20 gPickLivesTopLeft, Choose Location
-Gui, Settings:Add, Text, x20 y140, Lives Bottom Right:
-Gui, Settings:Add, Edit, x150 y140 w100 vLivesBottomRight
-Gui, Settings:Add, Button, x260 y140 w100 h20 gPickLivesBottomRight, Choose Location
-Gui, Settings:Add, Text, x20 y170, Option 1 Top Left:
-Gui, Settings:Add, Edit, x150 y170 w100 vOption1TopLeft
-Gui, Settings:Add, Button, x260 y170 w100 h20 gPickOption1TopLeft, Choose Location
-Gui, Settings:Add, Text, x20 y200, Option 1 Bottom Right:
-Gui, Settings:Add, Edit, x150 y200 w100 vOption1BottomRight
-Gui, Settings:Add, Button, x260 y200 w100 h20 gPickOption1BottomRight, Choose Location
-Gui, Settings:Add, Text, x20 y230, Option 1 Click:
-Gui, Settings:Add, Edit, x150 y230 w100 vOption1Click
-Gui, Settings:Add, Button, x260 y230 w100 h20 gPickOption1Click, Choose Location
-Gui, Settings:Tab, Scrolls
-Gui, Settings:Add, CheckBox, x20 y50 vScrollHoppa, Hoppa
-Gui, Settings:Add, CheckBox, x120 y50 vScrollSnarvindur, Snarvindur
-Gui, Settings:Add, CheckBox, x220 y50 vScrollPercutiens, Percutiens
-Gui, Settings:Tab, Webhook
-Gui, Settings:Add, CheckBox, x20 y50 vWebhookOnStart, On Start
-Gui, Settings:Add, CheckBox, x120 y50 vWebhookOnStop, On Stop
-Gui, Settings:Add, CheckBox, x220 y50 vWebhookOnCaptcha, On Captcha
-Gui, Settings:Add, CheckBox, x20 y80 vWebhookOnMenu, On Menu
-Gui, Settings:Add, CheckBox, x120 y80 vWebhookOnPlay, On Play
-Gui, Settings:Add, CheckBox, x220 y80 vWebhookOnSilver, On Silver
-Gui, Settings:Add, Button, x20 y250 w100 h30 gSaveSettings, Save
-return
-
-Start:
-    Log("Script started.")
-    SetTimer, MainLoop, 1000
-    IniRead, play_button, config.ini, Coordinates, play_button
-    Click, %play_button%
-    SendWebhookWithScreenshot("Clicked play button.", "play")
-    SendWebhookWithScreenshot("Script started.", "start")
+CreateSettingsGUI()
+{
+    Gui, Settings:Font, s10, Segoe UI
+    Gui, Settings:Add, Tab2, x10 y10 w480 h380, General|Coordinates|Scrolls|Webhook
+    Gui, Settings:Tab, General
+    Gui, Settings:Add, Text, x20 y50, Start Key:
+    Gui, Settings:Add, Hotkey, x120 y50 vStartKey, F1
+    Gui, Settings:Add, Text, x20 y90, Stop Key:
+    Gui, Settings:Add, Hotkey, x120 y90 vStopKey, F2
+    Gui, Settings:Add, Text, x20 y130, Webhook URL:
+    Gui, Settings:Add, Edit, x120 y130 w250 vWebhookURL
+    Gui, Settings:Tab, Coordinates
+    Gui, Settings:Add, Text, x20 y50, Day Top Left:
+    Gui, Settings:Add, Edit, x150 y50 w100 vDayTopLeft
+    Gui, Settings:Add, Button, x260 y50 w100 h20 gPickDayTopLeft, Choose Location
+    Gui, Settings:Add, Text, x20 y80, Day Bottom Right:
+    Gui, Settings:Add, Edit, x150 y80 w100 vDayBottomRight
+    Gui, Settings:Add, Button, x260 y80 w100 h20 gPickDayBottomRight, Choose Location
+    Gui, Settings:Add, Text, x20 y110, Lives Top Left:
+    Gui, Settings:Add, Edit, x150 y110 w100 vLivesTopLeft
+    Gui, Settings:Add, Button, x260 y110 w100 h20 gPickLivesTopLeft, Choose Location
+    Gui, Settings:Add, Text, x20 y140, Lives Bottom Right:
+    Gui, Settings:Add, Edit, x150 y140 w100 vLivesBottomRight
+    Gui, Settings:Add, Button, x260 y140 w100 h20 gPickLivesBottomRight, Choose Location
+    Gui, Settings:Add, Text, x20 y170, Option 1 Top Left:
+    Gui, Settings:Add, Edit, x150 y170 w100 vOption1TopLeft
+    Gui, Settings:Add, Button, x260 y170 w100 h20 gPickOption1TopLeft, Choose Location
+    Gui, Settings:Add, Text, x20 y200, Option 1 Bottom Right:
+    Gui, Settings:Add, Edit, x150 y200 w100 vOption1BottomRight
+    Gui, Settings:Add, Button, x260 y200 w100 h20 gPickOption1BottomRight, Choose Location
+    Gui, Settings:Add, Text, x20 y230, Option 1 Click:
+    Gui, Settings:Add, Edit, x150 y230 w100 vOption1Click
+    Gui, Settings:Add, Button, x260 y230 w100 h20 gPickOption1Click, Choose Location
+    Gui, Settings:Tab, Scrolls
+    Gui, Settings:Add, CheckBox, x20 y50 vScrollHoppa, Hoppa
+    Gui, Settings:Add, CheckBox, x120 y50 vScrollSnarvindur, Snarvindur
+    Gui, Settings:Add, CheckBox, x220 y50 vScrollPercutiens, Percutiens
+    Gui, Settings:Tab, Webhook
+    Gui, Settings:Add, CheckBox, x20 y50 vWebhookOnStart, On Start
+    Gui, Settings:Add, CheckBox, x120 y50 vWebhookOnStop, On Stop
+    Gui, Settings:Add, CheckBox, x220 y50 vWebhookOnCaptcha, On Captcha
+    Gui, Settings:Add, CheckBox, x20 y80 vWebhookOnMenu, On Menu
+    Gui, Settings:Add, CheckBox, x120 y80 vWebhookOnPlay, On Play
+    Gui, Settings:Add, CheckBox, x220 y80 vWebhookOnSilver, On Silver
+    Gui, Settings:Add, Button, x20 y250 w100 h30 gSaveSettings, Save
     return
+}
 
-Stop:
-    Log("Script stopped.")
-    SendWebhookWithScreenshot("Script stopped.", "stop")
-    SetTimer, MainLoop, Off
-    return
-
-Settings:
+LoadSettings()
+{
     IniRead, current_start_key, config.ini, Settings, start_key, F1
     IniRead, current_stop_key, config.ini, Settings, stop_key, F2
     IniRead, current_webhook_url, config.ini, Settings, webhook_url,
@@ -115,10 +107,10 @@ Settings:
     GuiControl, Settings:, ScrollHoppa, % InStr(current_enabled_scrolls, "hoppa") ? 1 : 0
     GuiControl, Settings:, ScrollSnarvindur, % InStr(current_enabled_scrolls, "snarvindur") ? 1 : 0
     GuiControl, Settings:, ScrollPercutiens, % InStr(current_enabled_scrolls, "percutiens") ? 1 : 0
-    Gui, Settings:Show, h300 w400, Settings
-    return
+}
 
-SaveSettings:
+SaveSettings()
+{
     Log("Saving settings.")
     Gui, Settings:Submit, NoHide
     enabled_scrolls := ""
@@ -151,6 +143,30 @@ SaveSettings:
     if (WebhookURL)
         SendWebhookWithScreenshot("Webhook test successful!", "start")
     MsgBox, 0, Settings, Settings saved successfully!
+}
+
+CreateGUI()
+CreateSettingsGUI()
+return
+
+Start:
+    Log("Script started.")
+    SetTimer, MainLoop, 1000
+    IniRead, play_button, config.ini, Coordinates, play_button
+    Click, %play_button%
+    SendWebhookWithScreenshot("Clicked play button.", "play")
+    SendWebhookWithScreenshot("Script started.", "start")
+    return
+
+Stop:
+    Log("Script stopped.")
+    SendWebhookWithScreenshot("Script stopped.", "stop")
+    SetTimer, MainLoop, Off
+    return
+
+Settings:
+    LoadSettings()
+    Gui, Settings:Show, h300 w400, Settings
     return
 
 PickLocation(control)
@@ -212,7 +228,7 @@ ExitFunc(ExitReason, ExitCode)
 
 Log(message)
 {
-    FileAppend, %A_Now% - %message%`n, log.txt
+    FileAppend, %A_Now% - %A_ThisFunc% - %message%`n, log.txt
 }
 
 MainLoop:
