@@ -335,10 +335,10 @@ SendWebhookWithScreenshot(message, event_type)
         whr.SetRequestHeader("Content-Type", "multipart/form-data; boundary=" . boundary)
 
         payload := "--" . boundary . "`r`n"
-        payload .= "Content-Disposition: form-data; name=`"payload_json`"`r`n`r`n"
+        payload .= "Content-Disposition: form-data; name=""payload_json""`r`n`r`n"
         payload .= JSON.Dump({content: message}) . "`r`n"
         payload .= "--" . boundary . "`r`n"
-        payload .= "Content-Disposition: form-data; name=`"file`"; filename=`"screenshot.png`"`r`n"
+        payload .= "Content-Disposition: form-data; name=""file""; filename=""screenshot.png""`r`n"
         payload .= "Content-Type: image/png`r`n`r`n"
 
         FileRead, file_content, *c screenshot.png
