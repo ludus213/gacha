@@ -28,15 +28,15 @@ Loop
 }
 
 ; GUI
-Gui, Font, s10
-Gui, Add, Button, x12 y10 w100 h40 gStart, Start
-Gui, Add, Button, x122 y10 w100 h40 gStop, Stop
-Gui, Add, Button, x232 y10 w40 h40 gSettings, ⚙️
-Gui, Show, h60 w285, Auto Clicker
+Gui, Font, s12, Segoe UI
+Gui, Add, Button, x12 y10 w120 h50 gStart, Start
+Gui, Add, Button, x142 y10 w120 h50 gStop, Stop
+Gui, Add, Button, x272 y10 w50 h50 gSettings, ⚙️
+Gui, Show, h70 w335, Auto Clicker
 
 ; Settings GUI
-Gui, Settings:Font, s10
-Gui, Settings:Add, Tab4, x10 y10 w380 h280, General|Coordinates|Scrolls|Webhook
+Gui, Settings:Font, s10, Segoe UI
+Gui, Settings:Add, Tab4, x10 y10 w480 h380, General|Coordinates|Scrolls|Webhook
 Gui, Settings:Tab, General
 Gui, Settings:Add, Text, x20 y50, Start Key:
 Gui, Settings:Add, Hotkey, x120 y50 vStartKey, F1
@@ -68,9 +68,9 @@ Gui, Settings:Add, Edit, x150 y230 w100 vOption1Click
 Gui, Settings:Add, Button, x260 y230 w100 h20 gPickOption1Click, Choose Location
 ; ... (add more option settings here)
 Gui, Settings:Tab, Scrolls
-Gui, Settings:Add, CheckBox, x20 y50 vHoppa, Hoppa
-Gui, Settings:Add, CheckBox, x120 y50 vSnarvindur, Snarvindur
-Gui, Settings:Add, CheckBox, x220 y50 vPercutiens, Percutiens
+Gui, Settings:Add, CheckBox, x20 y50 vScrollHoppa, Hoppa
+Gui, Settings:Add, CheckBox, x120 y50 vScrollSnarvindur, Snarvindur
+Gui, Settings:Add, CheckBox, x220 y50 vScrollPercutiens, Percutiens
 Gui, Settings:Tab, Webhook
 Gui, Settings:Add, CheckBox, x20 y50 vWebhookOnStart, On Start
 Gui, Settings:Add, CheckBox, x120 y50 vWebhookOnStop, On Stop
@@ -78,8 +78,6 @@ Gui, Settings:Add, CheckBox, x220 y50 vWebhookOnCaptcha, On Captcha
 Gui, Settings:Add, CheckBox, x20 y80 vWebhookOnMenu, On Menu
 Gui, Settings:Add, CheckBox, x120 y80 vWebhookOnPlay, On Play
 Gui, Settings:Add, CheckBox, x220 y80 vWebhookOnSilver, On Silver
-Gui, Settings:Add, CheckBox, x120 y50 vSnarvindur, Snarvindur
-Gui, Settings:Add, CheckBox, x220 y50 vPercutiens, Percutiens
 Gui, Settings:Add, Button, x20 y250 w100 h30 gSaveSettings, Save
 return
 
@@ -106,9 +104,9 @@ Settings:
     GuiControl, Settings:, WebhookURL, %current_webhook_url%
 
     ; Set checkboxes based on enabled scrolls
-    GuiControl, Settings:, Hoppa, % InStr(current_enabled_scrolls, "hoppa") ? 1 : 0
-    GuiControl, Settings:, Snarvindur, % InStr(current_enabled_scrolls, "snarvindur") ? 1 : 0
-    GuiControl, Settings:, Percutiens, % InStr(current_enabled_scrolls, "percutiens") ? 1 : 0
+    GuiControl, Settings:, ScrollHoppa, % InStr(current_enabled_scrolls, "hoppa") ? 1 : 0
+    GuiControl, Settings:, ScrollSnarvindur, % InStr(current_enabled_scrolls, "snarvindur") ? 1 : 0
+    GuiControl, Settings:, ScrollPercutiens, % InStr(current_enabled_scrolls, "percutiens") ? 1 : 0
 
     Gui, Settings:Show, h300 w400, Settings
     return
@@ -116,11 +114,11 @@ Settings:
 SaveSettings:
     Gui, Settings:Submit, NoHide
     enabled_scrolls := ""
-    if (Hoppa)
+    if (ScrollHoppa)
         enabled_scrolls .= "hoppa,"
-    if (Snarvindur)
+    if (ScrollSnarvindur)
         enabled_scrolls .= "snarvindur,"
-    if (Percutiens)
+    if (ScrollPercutiens)
         enabled_scrolls .= "percutiens,"
 
     ; Save all settings to config.ini

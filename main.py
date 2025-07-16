@@ -174,6 +174,11 @@ def get_silver():
     try:
         silver_tl = get_config_coords('silver_top_left')
         silver_br = get_config_coords('silver_bottom_right')
+
+        # Check if coordinates are valid
+        if silver_tl[0] < 0 or silver_tl[1] < 0 or silver_br[0] > pyautogui.size()[0] or silver_br[1] > pyautogui.size()[1]:
+            return jsonify({'error': 'Invalid coordinates for silver detection.'})
+
         img = ImageGrab.grab(bbox=(*silver_tl, *silver_br))
         text = pytesseract.image_to_string(img, config='--psm 6').strip()
         return jsonify({'silver': text})
