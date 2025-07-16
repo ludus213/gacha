@@ -7,7 +7,7 @@ SetWorkingDir, %A_ScriptDir%
 RunWait, pip install -r requirements.txt, , Hide
 
 ; Start Python Server
-Run, python main.py, , Hide
+Run, python main.py
 
 ; Wait for server to start
 Loop
@@ -17,14 +17,13 @@ Loop
         whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
         whr.Open("GET", "http://127.0.0.1:5000/", true)
         whr.Send()
-        whr.WaitForResponse(5)
-        if (whr.Status == 200)
+        if whr.WaitForResponse(2) && whr.Status == 200
             break
     }
     catch e
     {
-        Sleep, 1000
     }
+    Sleep, 1000
 }
 
 ; GUI
