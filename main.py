@@ -142,5 +142,9 @@ def solve_captcha():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({'status': 'ok'})
+
 if __name__ == '__main__':
     app.run(debug=True)

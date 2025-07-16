@@ -8,7 +8,18 @@ RunWait, pip install -r requirements.txt, , Hide
 
 ; Start Python Server
 Run, python main.py, , Hide
-Sleep, 5000 ; Wait for server to start
+
+; Wait for server to start
+Loop
+{
+    whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+    whr.Open("GET", "http://127.0.0.1:5000/", true)
+    whr.Send()
+    whr.WaitForResponse(2)
+    if (whr.Status == 200)
+        break
+    Sleep, 1000
+}
 
 ; GUI
 Gui, Font, s10
@@ -29,9 +40,27 @@ Gui, Settings:Add, Text, x20 y130, Webhook URL:
 Gui, Settings:Add, Edit, x120 y130 w250 vWebhookURL
 Gui, Settings:Tab, Coordinates
 Gui, Settings:Add, Text, x20 y50, Day Top Left:
-Gui, Settings:Add, Edit, x150 y50 w100 vDayTopLeft, 1416, 931
-Gui, Settings:Add, Button, x260 y50 w100 h20 gPickDayTopLeft, Pick
-; ... (add more coordinate settings here)
+Gui, Settings:Add, Edit, x150 y50 w100 vDayTopLeft
+Gui, Settings:Add, Button, x260 y50 w100 h20 gPickDayTopLeft, Choose Location
+Gui, Settings:Add, Text, x20 y80, Day Bottom Right:
+Gui, Settings:Add, Edit, x150 y80 w100 vDayBottomRight
+Gui, Settings:Add, Button, x260 y80 w100 h20 gPickDayBottomRight, Choose Location
+Gui, Settings:Add, Text, x20 y110, Lives Top Left:
+Gui, Settings:Add, Edit, x150 y110 w100 vLivesTopLeft
+Gui, Settings:Add, Button, x260 y110 w100 h20 gPickLivesTopLeft, Choose Location
+Gui, Settings:Add, Text, x20 y140, Lives Bottom Right:
+Gui, Settings:Add, Edit, x150 y140 w100 vLivesBottomRight
+Gui, Settings:Add, Button, x260 y140 w100 h20 gPickLivesBottomRight, Choose Location
+Gui, Settings:Add, Text, x20 y170, Option 1 Top Left:
+Gui, Settings:Add, Edit, x150 y170 w100 vOption1TopLeft
+Gui, Settings:Add, Button, x260 y170 w100 h20 gPickOption1TopLeft, Choose Location
+Gui, Settings:Add, Text, x20 y200, Option 1 Bottom Right:
+Gui, Settings:Add, Edit, x150 y200 w100 vOption1BottomRight
+Gui, Settings:Add, Button, x260 y200 w100 h20 gPickOption1BottomRight, Choose Location
+Gui, Settings:Add, Text, x20 y230, Option 1 Click:
+Gui, Settings:Add, Edit, x150 y230 w100 vOption1Click
+Gui, Settings:Add, Button, x260 y230 w100 h20 gPickOption1Click, Choose Location
+; ... (add more option settings here)
 Gui, Settings:Tab, Scrolls
 Gui, Settings:Add, CheckBox, x20 y50 vHoppa, Hoppa
 Gui, Settings:Add, CheckBox, x120 y50 vSnarvindur, Snarvindur
@@ -48,7 +77,23 @@ Stop:
     return
 
 Settings:
-    Gui, Settings:Show, h140 w300, Settings
+    ; Load current settings
+    IniRead, current_start_key, config.ini, Settings, start_key, F1
+    IniRead, current_stop_key, config.ini, Settings, stop_key, F2
+    IniRead, current_webhook_url, config.ini, Settings, webhook_url,
+    IniRead, current_enabled_scrolls, config.ini, Settings, enabled_scrolls,
+
+    ; Set the GUI controls with current values
+    GuiControl, Settings:, StartKey, %current_start_key%
+    GuiControl, Settings:, StopKey, %current_stop_key%
+    GuiControl, Settings:, WebhookURL, %current_webhook_url%
+
+    ; Set checkboxes based on enabled scrolls
+    GuiControl, Settings:, Hoppa, % InStr(current_enabled_scrolls, "hoppa") ? 1 : 0
+    GuiControl, Settings:, Snarvindur, % InStr(current_enabled_scrolls, "snarvindur") ? 1 : 0
+    GuiControl, Settings:, Percutiens, % InStr(current_enabled_scrolls, "percutiens") ? 1 : 0
+
+    Gui, Settings:Show, h300 w400, Settings
     return
 
 SaveSettings:
@@ -61,16 +106,57 @@ SaveSettings:
     if (Percutiens)
         enabled_scrolls .= "percutiens,"
 
+    ; Save all settings to config.ini
     IniWrite, %StartKey%, config.ini, Settings, start_key
     IniWrite, %StopKey%, config.ini, Settings, stop_key
     IniWrite, %WebhookURL%, config.ini, Settings, webhook_url
     IniWrite, %enabled_scrolls%, config.ini, Settings, enabled_scrolls
+
+    ; Update hotkeys
+    Hotkey, %StartKey%, Start
+    Hotkey, %StopKey%, Stop
+
+    MsgBox, 0, Settings, Settings saved successfully!
     return
 
-PointPicker:
-    CoordMode, Mouse, Screen
-    MouseGetPos, xpos, ypos
-    MsgBox, The current mouse position is X%xpos% Y%ypos%
+PickLocation(control)
+{
+    Gui, Settings: +OwnDialogs
+    MsgBox, 4, Pick Location, Click on the desired location.
+    IfMsgBox, Cancel
+        return
+    KeyWait, LButton, D
+    MouseGetPos, x, y
+    GuiControl, Settings:, %control%, %x%, %y%
+    return
+}
+
+PickDayTopLeft:
+    PickLocation("DayTopLeft")
+    return
+
+PickDayBottomRight:
+    PickLocation("DayBottomRight")
+    return
+
+PickLivesTopLeft:
+    PickLocation("LivesTopLeft")
+    return
+
+PickLivesBottomRight:
+    PickLocation("LivesBottomRight")
+    return
+
+PickOption1TopLeft:
+    PickLocation("Option1TopLeft")
+    return
+
+PickOption1BottomRight:
+    PickLocation("Option1BottomRight")
+    return
+
+PickOption1Click:
+    PickLocation("Option1Click")
     return
 
 FocusRoblox()
