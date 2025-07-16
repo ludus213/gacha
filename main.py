@@ -25,11 +25,6 @@ def log_response(func):
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-# Set Tesseract path
-tesseract_path = get_config_setting('tesseract_path')
-if tesseract_path:
-    pytesseract.pytesseract.tesseract_cmd = tesseract_path
-
 # Load the trained model
 model = tf.keras.models.load_model('captcha_model.h5')
 
@@ -195,4 +190,8 @@ def index():
     return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
+    # Set Tesseract path
+    tesseract_path = get_config_setting('tesseract_path')
+    if tesseract_path:
+        pytesseract.pytesseract.tesseract_cmd = tesseract_path
     app.run(debug=True)

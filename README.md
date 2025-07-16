@@ -16,7 +16,7 @@ This is a Python and AutoHotkey automation bot that can perform various tasks in
    pip install -r requirements.txt
    ```
 3. Install Tesseract OCR from the official website: https://github.com/tesseract-ocr/tesseract
-4. Add the Tesseract installation directory to your system's PATH environment variable. For example, if you installed Tesseract in `C:\Program Files\Tesseract-OCR`, you would add that path to your PATH.
+4. Open the `config.ini` file and set the `tesseract_path` variable to the path of your Tesseract executable. For example, on Windows, this might be `C:\Program Files\Tesseract-OCR\tesseract.exe`.
 5. Place your training images for the captcha in the `images/captcha` directory, with each captcha type in its own folder.
 6. Run the `train_model.py` script to train the captcha recognition model:
    ```
