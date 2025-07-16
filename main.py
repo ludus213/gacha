@@ -9,8 +9,17 @@ import cv2
 import numpy as np
 import tensorflow as tf
 import pyautogui
+from functools import wraps
 
 app = Flask(__name__)
+
+def log_response(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        response = func(*args, **kwargs)
+        print(f"Response for {func.__name__}: {response.get_json()}")
+        return response
+    return wrapper
 
 # Load config
 config = configparser.ConfigParser()
@@ -37,6 +46,7 @@ def send_webhook(message, filename=None):
             requests.post(url, json=data)
 
 @app.route('/get_day', methods=['GET'])
+@log_response
 def get_day():
     try:
         day_tl = get_config_coords('day_top_left')
@@ -48,6 +58,7 @@ def get_day():
         return jsonify({'error': str(e)})
 
 @app.route('/get_lives', methods=['GET'])
+@log_response
 def get_lives():
     try:
         lives_tl = get_config_coords('lives_top_left')
@@ -68,11 +79,26 @@ def gacha_action():
         else:
             return jsonify({'error': 'Pixel not found'})
 
-        time.sleep(5)
+        # Wait for option text to appear
+        start_time = time.time()
+        while time.time() - start_time < 45:
+            for i in range(1, 6):
+                option_tl = get_config_coords(f'option{i}_top_left')
+                option_br = get_config_coords(f'option{i}_bottom_right')
+                option_img = ImageGrab.grab(bbox=(*option_tl, *option_br))
+                text = pytesseract.image_to_string(option_img, config='--psm 6').strip()
+                if text:
+                    # Call solve_captcha
+                    response = requests.post('http://127.0.0.1:5000/solve_captcha')
+                    return response.json()
+            time.sleep(1)
 
-        # Call solve_captcha
-        response = requests.post('http://127.0.0.1:5000/solve_captcha')
-        return response.json()
+        # If timeout is reached, proceed with the clicks
+        pyautogui.click(1156, 856)
+        time.sleep(1)
+        pyautogui.click(1156, 856)
+        return jsonify({'status': 'timeout', 'message': 'Option text not found, proceeding with default clicks.'})
+
     except Exception as e:
         return jsonify({'error': str(e)})
 
@@ -139,6 +165,18 @@ def solve_captcha():
                 return jsonify({'status': 'success', 'clicked': option_text})
 
         return jsonify({'status': 'error', 'message': 'Could not find a matching option.'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/get_silver', methods=['GET'])
+@log_response
+def get_silver():
+    try:
+        silver_tl = get_config_coords('silver_top_left')
+        silver_br = get_config_coords('silver_bottom_right')
+        img = ImageGrab.grab(bbox=(*silver_tl, *silver_br))
+        text = pytesseract.image_to_string(img, config='--psm 6').strip()
+        return jsonify({'silver': text})
     except Exception as e:
         return jsonify({'error': str(e)})
 
