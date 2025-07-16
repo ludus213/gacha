@@ -12,13 +12,19 @@ Run, python main.py, , Hide
 ; Wait for server to start
 Loop
 {
-    whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-    whr.Open("GET", "http://127.0.0.1:5000/", true)
-    whr.Send()
-    whr.WaitForResponse(2)
-    if (whr.Status == 200)
-        break
-    Sleep, 1000
+    try
+    {
+        whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+        whr.Open("GET", "http://127.0.0.1:5000/", true)
+        whr.Send()
+        whr.WaitForResponse(5)
+        if (whr.Status == 200)
+            break
+    }
+    catch e
+    {
+        Sleep, 1000
+    }
 }
 
 ; GUI
@@ -69,10 +75,12 @@ Gui, Settings:Add, Button, x20 y250 w100 h30 gSaveSettings, Save
 return
 
 Start:
+    SendWebhook("Script started.")
     SetTimer, MainLoop, 1000
     return
 
 Stop:
+    SendWebhook("Script stopped.")
     SetTimer, MainLoop, Off
     return
 
@@ -115,6 +123,9 @@ SaveSettings:
     ; Update hotkeys
     Hotkey, %StartKey%, Start
     Hotkey, %StopKey%, Stop
+
+    ; Send test webhook
+    SendWebhook("Webhook test successful!")
 
     MsgBox, 0, Settings, Settings saved successfully!
     return
@@ -262,4 +273,5 @@ SendWebhook(message)
 }
 
 GuiClose:
+SendWebhook("Script exited.")
 ExitApp
