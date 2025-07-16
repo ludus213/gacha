@@ -149,7 +149,7 @@ SaveSettings:
     Hotkey, %StopKey%, Stop
 
     ; Send test webhook
-    SendWebhook("Webhook test successful!")
+    SendWebhookWithScreenshot("Webhook test successful!", "start")
 
     MsgBox, 0, Settings, Settings saved successfully!
     return
@@ -321,11 +321,11 @@ SendWebhookWithScreenshot(message, event_type)
         DllCall("gdi32\BitBlt", "Ptr", hDC, "Int", 0, "Int", 0, "Int", A_ScreenWidth, "Int", A_ScreenHeight, "Ptr", DllCall("gdi32\CreateDC", "Str", "DISPLAY", "Ptr", 0, "Ptr", 0, "Ptr", 0), "Int", 0, "Int", 0, "UInt", 0xCC0020)
 
         ; Save screenshot to file
-        Gdip_Startup()
+        pToken := Gdip_Startup()
         pBitmap := Gdip_CreateBitmapFromHBITMAP(hBM)
         Gdip_SaveBitmapToFile(pBitmap, "screenshot.png", "image/png")
         Gdip_DisposeImage(pBitmap)
-        Gdip_Shutdown()
+        Gdip_Shutdown(pToken)
 
         ; Send webhook
         whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
