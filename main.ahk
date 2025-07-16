@@ -1,4 +1,5 @@
 #SingleInstance, Force
+SetBatchLines, -1
 SendMode Input
 SetWorkingDir, %A_ScriptDir%
 #Include JSON.ahk
@@ -15,6 +16,7 @@ RunWait, pip install -r requirements.txt, , Hide
 
 ; Start Python Server
 Run, python main.py
+Sleep, 5000
 
 ; Wait for server to start
 Loop
